@@ -45,7 +45,7 @@ const GlobalSearchPage: NextPage = ({}) => {
 
             {/* PFAM*/}
             <h3 className="text-2xl font-medium mb-4">Searching by PFAM domains</h3>
-            <p className="text-sm text-stone-400 my-2">If you have a protein domain in mind, you can navigate to <TextLink href="/iterpro">PFAM</TextLink> page. There, you can type in e.g., 'cellulose', which will show you all PFAM domains containing this word in their description. By clicking on the link of a domain, (e.g., <TextLink href="/interpro/PF03552">PF03552</TextLink>), you will be shown all genes that have this domain.</p>
+            <p className="text-sm text-stone-400 my-2">If you have a protein domain in mind, you can navigate to <TextLink href="/iterpro">PFAM</TextLink> page. There, you can type in e.g., <i>cellulose</i>, which will show you all PFAM domains containing this word in their description. By clicking on the link of a domain, (e.g., <TextLink href="/interpro/PF03552">PF03552</TextLink>), you will be shown all genes that have this domain.</p>
 
             {/* Mapman*/}
             <h3 className="text-2xl font-medium mb-4">Searching by Mapman functional terms</h3>
@@ -53,7 +53,7 @@ const GlobalSearchPage: NextPage = ({}) => {
 
             {/* Species*/}
             <h3 className="text-2xl font-medium mb-4">Searching by browsing species gene pages</h3>
-            <p className="text-sm text-stone-400 my-2">If you have a species in mind, navigate to <TextLink href="/species">Species</TextLink> page, and click on your species of interest. For example, if you are working on cellulose synthesis in poplar, enter 'populus' in the search box, click on click on <TextLink href="/species/3694">Populus trichocarpa</TextLink> and then write 'cellulose' in the search box.</p>
+            <p className="text-sm text-stone-400 my-2">If you have a species in mind, navigate to <TextLink href="/species">Species</TextLink> page, and click on your species of interest. For example, if you are working on cellulose synthesis in poplar, enter <i>populus</i> in the search box, click on click on <TextLink href="/species/3694">Populus trichocarpa</TextLink> and then write <i>cellulose</i> in the search box.</p>
 
           </div>
 
