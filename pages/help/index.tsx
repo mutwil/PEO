@@ -53,7 +53,7 @@ const GlobalSearchPage: NextPage = ({}) => {
 
             {/* Species*/}
             <h3 className="text-2xl font-medium mb-4">Searching by browsing species gene pages</h3>
-            <p className="text-sm text-stone-400 my-2">If you have a species in mind, navigate to <TextLink href="/species">Species</TextLink> page, and click on your species of interest. For example, if you are working on cellulose synthesis in poplar, enter <i>populus</i> in the search box, click on click on <TextLink href="/species/3694">Populus trichocarpa</TextLink> and then write <i>cellulose</i> in the search box.</p>
+            <p className="text-sm text-stone-400 my-2">If you have a species in mind, navigate to  <TextLink href="/species">Species</TextLink> page, and click on your species of interest. For example, if you are working on cellulose synthesis in poplar, enter <i>populus</i> in the search box, click on click on <TextLink href="/species/3694">Populus trichocarpa</TextLink> and then write <i>cellulose</i> in the search box.</p>
 
           </div>
 

@@ -59,7 +59,7 @@ const Home: NextPage = () => {
           */}
           <SearchBox
             initialValue=""
-            placeholder="Search for your favorite gene ..."
+            placeholder="Enter your gene ID"
             getSuggestions={getGenesSuggestions}
             submitSearchQuery={(query: string) => {
               router.push({
@@ -79,19 +79,13 @@ const Home: NextPage = () => {
                 })
             }}
           />
+          Examples: <TextLink href="/species/3702/genes/AT4G32410"> AT4G31410</TextLink> <TextLink href="/species/4530/genes/LOC_OS01G06450.1">LOC_OS01G06450</TextLink>
         </div>
       </section>
 
       <section id="home-other-actions">
-        <div className="flex justify-center mb-1.5">
-          <TextLink href="/search/proteins">
-            Search by protein sequence instead
-          </TextLink>
-        </div>
         <div className="flex justify-center my-1.5">
-          <TextLink href="/species">
-            Search by particular species
-          </TextLink>
+        Alternatively, search by:  <TextLink href="/search/proteins">protein sequence similarity</TextLink>, <TextLink href="/interpro"> protein domains</TextLink>, <TextLink href="/mapman"> biological functions</TextLink> or <TextLink href="/species"> species.</TextLink>
         </div>
       </section>
     </Layout>
