@@ -110,7 +110,7 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
         ),
       },
       {
-        Header: "Mampman terms",
+        Header: "Mapman terms",
         accessor: "gene_names",
         Cell: ({ value }) => value ? value.join(", ") : "",
       },

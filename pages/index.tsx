@@ -80,13 +80,19 @@ const Home: NextPage = () => {
             }}
           />
           Examples: <TextLink href="/species/3702/genes/AT4G32410"> AT4G31410</TextLink> <TextLink href="/species/4530/genes/LOC_OS01G06450.1">LOC_OS01G06450</TextLink>
+          <br></br>
+          Alternatively, search by:  <TextLink href="/search/proteins">protein sequence similarity</TextLink>, <TextLink href="/interpro"> protein domains</TextLink>, <TextLink href="/mapman"> biological functions</TextLink> or <TextLink href="/species"> species.</TextLink>
+        
         </div>
       </section>
 
       <section id="home-other-actions">
         <div className="flex justify-center my-1.5">
-        Alternatively, search by:  <TextLink href="/search/proteins">protein sequence similarity</TextLink>, <TextLink href="/interpro"> protein domains</TextLink>, <TextLink href="/mapman"> biological functions</TextLink> or <TextLink href="/species"> species.</TextLink>
-        </div>
+          {/*
+            * Give suggestions
+            * 
+          */}        
+          </div>
       </section>
     </Layout>
   )
