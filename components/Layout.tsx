@@ -39,7 +39,7 @@ export default function Layout({ children }) {
                   ["Organs", "/organs"],
                   ["PFAM", "/interpro"],
                   ["Mapman", "/mapman"],
-                  ["Help", "/help"] 
+                  ["Help", "/help"]
                 ].map(([title, url]) => (
                   <li key={title} className="hover:bg-gray-200 first:hover:rounded-t-xl last:hover:rounded-b-xl md:hover:bg-inherit">
                     <TextLink

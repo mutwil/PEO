@@ -38,6 +38,7 @@ const MapmanIndexPage: NextPage<IProps> = ({ level1Bins, geneAnnotations, numGen
       </Head>
 
       <Header1>Mapman bins</Header1>
+      <p className="text-sm text-stone-400 my-2">Click on the biological process (Mapman bins) of interest. You can also view the bins as a table or view all bins at once.</p>
 
       <TabGroup>
         <TabHeaderGroup>

@@ -35,7 +35,7 @@ const OrganIndexPage: NextPage<IProps> = ({ poTerms }) => {
       </Head>
 
       <Header1>Plant Ontology (PO) Terms</Header1>
-      This tool is still in beta.  Search and select for your organ/tissue/cell type of interest. By clicking on the PO Term link, you will be taken to a page that shows you which genes are specifically expressed in these organs.
+      <p className="text-sm text-stone-400 my-2">This tool is still in beta.  Search and select for your organ/tissue/cell type of interest. By clicking on the PO Term link, you will be taken to a page that shows you which genes are specifically expressed in these organs.</p>
       <PoIndexTable data={poTerms} />
     </Layout>
   )

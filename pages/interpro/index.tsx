@@ -31,6 +31,8 @@ const PfamIndexPage: NextPage<IProps> = ({ geneAnnotations, numGeneAnnotations }
       </Head>
 
       <Header1>PFAM terms</Header1>
+      <p className="text-sm text-stone-400 my-2">Search for the Pfam domains by entering Pfam IDs or by a keyword (e.g., cellulose). Then, click on the Pfam ID link to see which genes and species contain this domain.</p>
+
       <InterproIndexTable
         initialGeneAnnotations={geneAnnotations}
         pageTotal={numGeneAnnotations}

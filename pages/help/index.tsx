@@ -61,6 +61,10 @@ const GlobalSearchPage: NextPage = ({}) => {
             <p className="text-sm text-stone-400 my-2">If you have a species in mind, navigate to  <TextLink href="/species">Species</TextLink> page, and click on your species of interest. For example, if you are working on cellulose synthesis in poplar, enter <i>populus</i> in the search box, click on click on <TextLink href="/species/3694">Populus trichocarpa</TextLink> and then write <i>cellulose</i> in the search box.</p>
             <img src="/images/species.PNG" width="700"></img>
 
+            <br></br>
+            <p className="text-sm text-stone-400 my-2">For any questions/bug reports, please write to Marek Mutwil at: mutwil [at] gmail.com.</p>
+            
+
       </section>
     </Layout>
   )

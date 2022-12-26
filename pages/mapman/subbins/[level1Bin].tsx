@@ -46,9 +46,11 @@ const MapmanSubbinIndexPage: NextPage<IProps> = ({ level1BinsNameMap, geneAnnota
 
       <div className="italic">
         <TextLink href="/mapman">
-          See all level 1 bins
+          Go back to the parent bins
         </TextLink>
       </div>
+      <p className="text-sm text-stone-400 my-2">Here, you see all children bins of the bin you selected. Find your bin of interest here and click on the bincode.</p>
+
       <Header1>{level1BinsNameMap[level1Bin]}</Header1>
       <div className="mb-4">
         <p>Mapman Bin {level1Bin}</p>

@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   env: {
-    pageSize: 10,
+    pageSize: 50,
   },
   typescript: {
     // !! WARN !!

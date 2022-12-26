@@ -1,6 +1,6 @@
 import React from "react"
 
-import LocalPaginatedTable from "./generics/LocalPaginatedTable"
+import LocalSimpleTable from "./generics/LocalSimpleTable"
 import TextLink from "../atomic/TextLink"
 
 const PccTable = ({ taxid, data }) => {
@@ -38,7 +38,7 @@ const PccTable = ({ taxid, data }) => {
   )
 
   return (
-    <LocalPaginatedTable
+    <LocalSimpleTable
       columns={columns}
       data={data}
       hiddenColumns={["tax"]}

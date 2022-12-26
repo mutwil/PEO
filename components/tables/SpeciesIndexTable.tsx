@@ -21,10 +21,11 @@ const SpeciesIndexTable = ({ data }) => {
         Header: "Scientific name",
         accessor: "name",
       },
+      /*          
       {
         Header: "Alias",
         accessor: "alias",
-      },
+      },*/
       {
         Header: "Source",
         accessor: "cds.source",
