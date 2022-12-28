@@ -2385,6 +2385,11 @@
   "resolved" "https://registry.npmjs.org/dotenv/-/dotenv-16.0.3.tgz"
   "version" "16.0.3"
 
+"downloadjs@^1.4.7":
+  "integrity" "sha512-LN1gO7+u9xjU5oEScGFKvXhYf7Y/empUIIEAGBs1LzUq/rg5duiDrkuH5A2lQGd5jfMOb9X9usDa2oVXwJ0U/Q=="
+  "resolved" "https://registry.npmjs.org/downloadjs/-/downloadjs-1.4.7.tgz"
+  "version" "1.4.7"
+
 "draw-svg-path@^1.0.0":
   "integrity" "sha512-P8j3IHxcgRMcY6sDzr0QvJDLzBnJJqpTG33UZ2Pvp8rw0apCHhJCWqYprqrXjrgHnJ6tuhP1iTJSAodPDHxwkg=="
   "resolved" "https://registry.npmjs.org/draw-svg-path/-/draw-svg-path-1.0.0.tgz"
@@ -3710,6 +3715,11 @@
   "resolved" "https://registry.npmjs.org/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz"
   "version" "0.7.1"
 
+"js-file-download@^0.4.12":
+  "integrity" "sha512-rML+NkoD08p5Dllpjo0ffy4jRHeY6Zsapvr/W86N7E0yuzAO6qa5X9+xog6zQNlH102J7IXljNY2FtS6Lj3ucg=="
+  "resolved" "https://registry.npmjs.org/js-file-download/-/js-file-download-0.4.12.tgz"
+  "version" "0.4.12"
+
 "js-tokens@^3.0.0 || ^4.0.0", "js-tokens@^4.0.0":
   "integrity" "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="
   "resolved" "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
@@ -4350,6 +4360,11 @@
   "resolved" "https://registry.npmjs.org/p-try/-/p-try-1.0.0.tgz"
   "version" "1.0.0"
 
+"papaparse@^5.3.2":
+  "integrity" "sha512-6dNZu0Ki+gyV0eBsFKJhYr+MdQYAzFUGlBMNj3GNrmHxmz1lfRa24CjFObPXtjcetlOv5Ad299MhIK0znp3afw=="
+  "resolved" "https://registry.npmjs.org/papaparse/-/papaparse-5.3.2.tgz"
+  "version" "5.3.2"
+
 "parent-module@^1.0.0":
   "integrity" "sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g=="
   "resolved" "https://registry.npmjs.org/parent-module/-/parent-module-1.0.1.tgz"
@@ -4704,6 +4719,11 @@
   dependencies:
     "loose-envify" "^1.1.0"
     "scheduler" "^0.23.0"
+
+"react-file-download@^0.3.5":
+  "integrity" "sha512-gP867caQCviTw2IUQTMTOFgHn2A71zoLYzHr4KkOI0gkwc1m4ceb/dxNOkG4yB8Hent2+G3f4qbr9Rzb9yZouw=="
+  "resolved" "https://registry.npmjs.org/react-file-download/-/react-file-download-0.3.5.tgz"
+  "version" "0.3.5"
 
 "react-is@^16.13.1", "react-is@^16.7.0":
   "integrity" "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="

@@ -2,6 +2,8 @@ import React from "react"
 
 import LocalSimpleTable from "./generics/LocalSimpleTable"
 import TextLink from "../atomic/TextLink"
+import download from "downloadjs"
+import Papa from "papaparse"
 
 const PccTable = ({ taxid, data }) => {
   const columns = React.useMemo(
@@ -35,16 +37,31 @@ const PccTable = ({ taxid, data }) => {
         accessor: "pcc",
       },
     ], []
-  )
+  );
+
+  const handleDownload = () => {
+    const formattedData = data.map(row => ({
+      "Gene": row.gene.label,
+      "Description": row.gene.mapman_annotations.map(anot => anot.name).join(", "),
+      "PCC Value": row.pcc,
+    }))
+    const csvData = Papa.unparse(formattedData)
+    download(csvData, "table.csv", "text/csv")
+  }
 
   return (
+    <div>
     <LocalSimpleTable
       columns={columns}
       data={data}
       hiddenColumns={["tax"]}
       autofocus={false}
     />
+    <button onClick={handleDownload}>Download Table</button>
+    </div>
   )
 }
+
+
 
 export default PccTable
