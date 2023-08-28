@@ -1,29 +1,24 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSampleAnnotations } from "../../../utils/sampleAnnotations";
 
-enum Metric {
+export enum Metric {
   AVG_TPM = "avg_tpm",
   MED_TPM = "med_tpm",
   SPM = "spm",
   SPM_MED = "spm_med",
 }
 
-interface GeneUnit {
+export interface GeneUnit {
   taxid: number;
   label: string;
 }
 
-interface PostPayload {
+export interface PostPayload {
   genes: GeneUnit[];
   metric?: Metric;
 }
 
-interface GetQueryParams {
-  genes: GeneUnit[];
-  metric?: Metric;
-}
-
-interface AnnotationMap {
+export interface AnnotationMap {
   [key: string]: number;
 }
 
@@ -59,31 +54,6 @@ export default async function handler(
         res.status(422).json({ error: `invalid query` });
       }
       break;
-
-    // case "GET":
-    //   try {
-    //     const params: GetQueryParams = {
-    //       genes: req.query.genes || [],
-    //       metric: Object.values(Metric).includes(req.query.metric as string)
-    //         ? req.query.metric
-    //         : Metric.AVG_TPM,
-    //     };
-    //     const projection = ["_id", "label", params.metric as string];
-    //     const results: any[] = [];
-    //     for (const { taxid, label } of params.genes) {
-    //       const result = await getSampleAnnotations(taxid, label, "PO", projection);
-    //       const resultMap = result.reduce((acc, curr) => {
-    //         acc[curr.label] = curr[params.metric as string];
-    //         return acc;
-    //       }, {});
-    //       results.push(resultMap);
-    //     }
-    //     res.status(200).json(results);
-    //   } catch (error: any) {
-    //     console.log(error);
-    //     res.status(422).json({ error: `invalid query` });
-    //   }
-    //   break;
 
     default:
       console.log("Method not available for this endpoint");
