@@ -193,7 +193,7 @@ export const getGenesSearchPage = async (
 export const getGeneLabelsSearchPage = async (
   searchTerm: string,
   pageIndex: number = 0,
-  pageSize: number = parseInt(process.env.pageSize),
+  pageSize: number = parseInt(process.env.pageSize as string),
 ) => {
   connectMongo()
   const genes = await Gene.find({label: new RegExp(searchTerm, "i")}, "label")

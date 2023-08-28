@@ -4,7 +4,7 @@ import Toggle from "../atomic/inputs/Toggle";
 import { useEffect, useState } from "react";
 import { round } from "mathjs";
 
-interface HeatmapData {
+export interface HeatmapData {
   sampleAnnotationLabels: string[];
   geneLabels: string[];
   tpmMatrix: number[][];
@@ -44,10 +44,10 @@ const validateHeatmapDataShape = (data: HeatmapData) => {
   }
   const firstRowWidth = data.tpmMatrix[0].length;
   const allColsSame = data.tpmMatrix.map(x => x.length).every(x => x === firstRowWidth);
-  if (allColsSame) {
+  if (!allColsSame) {
     console.warn(`Number of columns not the same for every row`);
   }
-  if (allColsSame && firstRowWidth === width) {
+  if (firstRowWidth !== width) {
     console.warn(`Number of sampleAnnotationLabels (${width}) does not match number of columns for first row`);
   }
 }

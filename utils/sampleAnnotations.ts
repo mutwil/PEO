@@ -15,6 +15,7 @@ export const getSampleAnnotations = async (
   taxid: number,
   geneLabel: string,
   type: string = "PO",
+  projection?: string[],
 ) => {
   connectMongo()
   const species = await Species.findOne({ "tax": taxid }, "_id")
@@ -26,7 +27,7 @@ export const getSampleAnnotations = async (
     "spe_id": species._id,
     "g_id": gene._id,
     "type": type,
-  }).lean()
+  }, projection).lean()
   return sas
 }
 
