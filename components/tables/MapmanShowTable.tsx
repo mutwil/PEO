@@ -1,11 +1,17 @@
-import React from "react"
+import { useContext, useMemo } from "react"
 
 import LocalPaginatedTable from "./generics/LocalPaginatedTable"
 import TextLink from "../atomic/TextLink"
 import ShowMoreList from "../atomic/texts/ShowMoreList"
+import { useRouter } from "next/router"
+import { GlobalStoreContext } from "../../pages/_app"
 
 const MapmanShowTable = ({ data }) => {
-  const columns = React.useMemo(
+
+  const router = useRouter();
+  const { setNavigationPayload } = useContext(GlobalStoreContext);
+
+  const columns = useMemo(
     () => [
       {
         Header: "Species",
@@ -29,8 +35,27 @@ const MapmanShowTable = ({ data }) => {
           />
         ),
       },
-    ], []
-  )
+      {
+        Header: "Heatmap",
+        Cell: ({ value, row }) => (
+          <TextLink
+            href="#"
+            onClick={e => {
+              e.preventDefault();
+              const taxid = row.original.species.tax;
+              const geneLabels = row.values.genes.map(gene => gene.label);
+              const payload = geneLabels.map(label => ({ taxid, label }));
+              setNavigationPayload(payload);
+              router.push("/heatmap");
+            }}
+          >
+            Go to heatmap
+          </TextLink>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <LocalPaginatedTable
