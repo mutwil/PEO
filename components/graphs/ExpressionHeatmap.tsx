@@ -52,7 +52,7 @@ const ExpressionHeatmap = ({ heatmapData, hideLoader }: ExpressionHeatmapProps) 
   const [ scrollZoomable, setScrollZoomable ] = useState(false);
   const [ normalizeRows, setNormalizeRows ] = useState(false);
 
-  if (!heatmapData || isHeatmapDataShapeValid(heatmapData as unknown as HeatmapData)) {
+  if (!heatmapData || !isHeatmapDataShapeValid(heatmapData as unknown as HeatmapData)) {
     return <p>Missing input to the heatmap</p>;
   }
 
