@@ -25,7 +25,7 @@ interface ExpressionHeatmapProps {
 const isHeatmapDataShapeValid = (data: HeatmapData): boolean => {
   const height = data.geneLabels.length;
   const width = data.sampleAnnotationLabels.length;
-  if (data.tpmMatrix.length === height) {
+  if (data.tpmMatrix.length !== height) {
     console.warn(`Number of geneLabels (${height}) does not match number of rows (${data.tpmMatrix.length})`);
     return false;
   }
