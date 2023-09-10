@@ -7,6 +7,7 @@ import Loader from "../../components/atomic/Loader";
 import Header1 from "../../components/atomic/texts/Header1";
 import { GlobalStoreContext } from "../_app";
 import { HeatmapData } from "../../components/graphs/ExpressionHeatmap";
+import * as math from "mathjs";
 // import { AnnotationMap, GeneUnit, Metric } from "../api/heatmap";
 
 
@@ -35,6 +36,20 @@ export interface GeneUnit {
 
 export interface AnnotationMap {
   [key: string]: number;
+}
+
+const generateDummyData = (nRows = 10, nCols = 5): HeatmapData => {
+  const sampleAnnotationLabels = Array.from({ length: nCols }).map((_, i) => `Sample ${i + 1}`);
+  const geneLabels = Array.from({ length: nRows }).map((_, i) => `Gene ${i + 1}`);
+  const tpmMatrix = Array(geneLabels.length)
+    .fill(null)
+    .map((_, i) =>
+      Array(sampleAnnotationLabels.length)
+        .fill(null)
+        .map((_, j): number => (i + j) % 7 ? math.round(Math.random() * 100, 3) : 0)
+    );
+
+  return { sampleAnnotationLabels, geneLabels, tpmMatrix };
 }
 
 const HeatmapPage: NextPage = () => {
@@ -98,7 +113,10 @@ const HeatmapPage: NextPage = () => {
         <Header1>Heatmap</Header1>
         <details>
           <summary>Genes included in this plot</summary>
-          <p className="my-4 italic text-stone-400">Each line identifies taxid, followed by gene identifier, separated by a whitespace.</p>
+          <p className="my-4 italic text-stone-400">
+            Each line identifies taxid, followed by gene identifier, separated
+            by a whitespace.
+          </p>
           <div className="my-4">
             <textarea
               disabled
@@ -116,10 +134,18 @@ const HeatmapPage: NextPage = () => {
 
       <section className="my-4">
         {loading && <Loader comment="Drawing the heatmap" />}
-        {heatmapData && <ExpressionHeatmap
-          heatmapData={heatmapData}
-          hideLoader={hideLoader}
-        />}
+        {heatmapData && (
+          <ExpressionHeatmap
+            heatmapData={heatmapData}
+            hideLoader={hideLoader}
+          />
+        )}
+        {/* {!heatmapData && (
+          <ExpressionHeatmap
+            heatmapData={generateDummyData(100, 20)}
+            hideLoader={hideLoader}
+          />
+        )} */}
         {!heatmapData && !loading && <p>No data yet</p>}
       </section>
     </Layout>
