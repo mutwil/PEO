@@ -11,7 +11,7 @@ const HeatmapDownloadLink = ({ data }: HeatmapDownloadLinkProps) => {
   const sep = "\t";
 
   const handleDownload = () => {
-    const headerLine = ["Gene", ...data.sampleAnnotationLabels].join(sep);
+    const headerLine = ["Gene", ...data.sampleAnnotationNames].join(sep);
     const dataLines = data.geneLabels.map((gene, i) => {
       return [gene, ...data.tpmMatrix[i]].join(sep);
     })
