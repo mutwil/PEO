@@ -1,7 +1,5 @@
 import React from "react"
 
-import TextLink from "../atomic/TextLink"
-
 type HeaderType = [string, string, string, string]
 type RowType = [string, string, string, number][]
 

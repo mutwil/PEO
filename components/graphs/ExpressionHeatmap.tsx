@@ -3,6 +3,7 @@ import Plot from "react-plotly.js"
 import Toggle from "../atomic/inputs/Toggle";
 import { useState } from "react";
 import * as math from "mathjs";
+import HeatmapDownloadLink from "../downloadLinks/HeatmapDownloadLink";
 
 export interface HeatmapData {
   sampleAnnotationLabels: string[];
@@ -70,20 +71,26 @@ const ExpressionHeatmap = ({ heatmapData, hideLoader }: ExpressionHeatmapProps) 
 
   return (
     <div className="my-4">
-      <div className="my-3">
-        <Toggle
-          currState={scrollZoomable}
-          handleChange={() => setScrollZoomable(curr => !curr)}
-          prompt="Allow zoom on scroll"
-        />
+      <div className="flex justify-between items-end">
+        <div className="">
+          <div className="my-3">
+            <Toggle
+              currState={normalizeRows}
+              handleChange={() => setNormalizeRows(curr => !curr)}
+              prompt="Normalize to each gene's max TPM"
+            />
+          </div>
+          <div className="my-3">
+            <Toggle
+              currState={scrollZoomable}
+              handleChange={() => setScrollZoomable(curr => !curr)}
+              prompt="Allow zoom on scroll"
+            />
+          </div>
+        </div>
+        <HeatmapDownloadLink data={heatmapData} />
       </div>
-      <div className="my-3">
-        <Toggle
-          currState={normalizeRows}
-          handleChange={() => setNormalizeRows(curr => !curr)}
-          prompt="Normalize to each gene's max TPM"
-        />
-      </div>
+
       <Plot
         className="overflow-hidden border border-stone-300 rounded-2xl shadow-lg min-h-[600px] w-full"
         data={[

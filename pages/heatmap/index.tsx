@@ -109,7 +109,7 @@ const HeatmapPage: NextPage = () => {
     <Layout>
       <Head>Heatmap</Head>
 
-      <section className="my-4">
+      {/* <section className="my-4">
         <Header1>Heatmap</Header1>
         <details>
           <summary>Genes included in this plot</summary>
@@ -130,7 +130,7 @@ const HeatmapPage: NextPage = () => {
             />
           </div>
         </details>
-      </section>
+      </section> */}
 
       <section className="my-4">
         {loading && <Loader comment="Drawing the heatmap" />}
