@@ -9,7 +9,7 @@ import { GlobalStoreContext } from "../_app";
 import { HeatmapData } from "../../components/graphs/ExpressionHeatmap";
 import * as math from "mathjs";
 // import { AnnotationMap, GeneUnit, Metric } from "../api/heatmap";
-
+import po_name_map from "../../public/data/po_name_map.json" assert { type: "json" };;
 
 const ExpressionHeatmap = dynamic(
   () => import("../../components/graphs/ExpressionHeatmap"),
@@ -39,17 +39,17 @@ export interface AnnotationMap {
 }
 
 const generateDummyData = (nRows = 10, nCols = 5): HeatmapData => {
-  const sampleAnnotationLabels = Array.from({ length: nCols }).map((_, i) => `Sample ${i + 1}`);
+  const sampleAnnotationNames = Array.from({ length: nCols }).map((_, i) => `Sample ${i + 1}`);
   const geneLabels = Array.from({ length: nRows }).map((_, i) => `Gene ${i + 1}`);
   const tpmMatrix = Array(geneLabels.length)
     .fill(null)
     .map((_, i) =>
-      Array(sampleAnnotationLabels.length)
+      Array(sampleAnnotationNames.length)
         .fill(null)
         .map((_, j): number => (i + j) % 7 ? math.round(Math.random() * 100, 3) : 0)
     );
 
-  return { sampleAnnotationLabels, geneLabels, tpmMatrix };
+  return { sampleAnnotationNames, geneLabels, tpmMatrix };
 }
 
 const HeatmapPage: NextPage = () => {
@@ -102,7 +102,8 @@ const HeatmapPage: NextPage = () => {
     tpmMatrix = data.map(geneData => {
       return sampleAnnotationLabels.map((label) => geneData[label]);
     });
-    return { sampleAnnotationLabels, geneLabels, tpmMatrix };
+    const sampleAnnotationNames = sampleAnnotationLabels.map(label => po_name_map[label] || label);
+    return { sampleAnnotationNames, geneLabels, tpmMatrix };
   }
 
   return (

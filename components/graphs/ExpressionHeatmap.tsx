@@ -6,7 +6,7 @@ import * as math from "mathjs";
 import HeatmapDownloadLink from "../downloadLinks/HeatmapDownloadLink";
 
 export interface HeatmapData {
-  sampleAnnotationLabels: string[];
+  sampleAnnotationNames: string[];
   geneLabels: string[];
   tpmMatrix: number[][];
 }
@@ -25,7 +25,7 @@ interface ExpressionHeatmapProps {
  */
 const isHeatmapDataShapeValid = (data: HeatmapData): boolean => {
   const height = data.geneLabels.length;
-  const width = data.sampleAnnotationLabels.length;
+  const width = data.sampleAnnotationNames.length;
   if (data.tpmMatrix.length !== height) {
     console.warn(`Number of geneLabels (${height}) does not match number of rows (${data.tpmMatrix.length})`);
     return false;
@@ -37,7 +37,7 @@ const isHeatmapDataShapeValid = (data: HeatmapData): boolean => {
     return false;
   }
   if (firstRowWidth !== width) {
-    console.warn(`Number of sampleAnnotationLabels (${width}) does not match number of columns for first row`);
+    console.warn(`Number of sampleAnnotationNames (${width}) does not match number of columns for first row`);
     return false;
   }
   return true;
@@ -97,7 +97,7 @@ const ExpressionHeatmap = ({ heatmapData, hideLoader }: ExpressionHeatmapProps) 
           {
             type: "heatmap",
             z: (normalizeRows ? normTpmMatrix : heatmapData.tpmMatrix),
-            x: heatmapData.sampleAnnotationLabels,
+            x: heatmapData.sampleAnnotationNames,
             y: heatmapData.geneLabels,
           },
         ]}
