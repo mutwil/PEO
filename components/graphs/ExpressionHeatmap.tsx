@@ -1,8 +1,8 @@
 import Plotly from "plotly.js";
 import Plot from "react-plotly.js"
 import Toggle from "../atomic/inputs/Toggle";
-import { useEffect, useState } from "react";
-import { round } from "mathjs";
+import { useState } from "react";
+import * as math from "mathjs";
 
 export interface HeatmapData {
   sampleAnnotationLabels: string[];
@@ -18,56 +18,49 @@ interface ExpressionHeatmapProps {
   hideLoader: () => void;
 }
 
-const generateDummyData = (nRows = 10, nCols = 5): HeatmapData => {
-  const sampleAnnotationLabels = Array.from({ length: nCols }).map((_, i) => `Sample ${i + 1}`);
-  const geneLabels = Array.from({ length: nRows }).map((_, i) => `Gene ${i + 1}`);
-  const tpmMatrix = Array(geneLabels.length)
-    .fill(null)
-    .map((_, i) =>
-      Array(sampleAnnotationLabels.length)
-        .fill(null)
-        .map((_, j): number => (i + j) % 7 ? round(Math.random() * 100, 3) : 0)
-    );
-
-  return { sampleAnnotationLabels, geneLabels, tpmMatrix };
-}
-
 /**
  * Did not opt for Matrix from math.js as the only goal was validating shape.
  * Don't need the overhead incurred for optimizing matrix calculations.
  */
-const validateHeatmapDataShape = (data: HeatmapData) => {
+const isHeatmapDataShapeValid = (data: HeatmapData): boolean => {
   const height = data.geneLabels.length;
   const width = data.sampleAnnotationLabels.length;
   if (data.tpmMatrix.length === height) {
     console.warn(`Number of geneLabels (${height}) does not match number of rows (${data.tpmMatrix.length})`);
+    return false;
   }
   const firstRowWidth = data.tpmMatrix[0].length;
   const allColsSame = data.tpmMatrix.map(x => x.length).every(x => x === firstRowWidth);
   if (!allColsSame) {
     console.warn(`Number of columns not the same for every row`);
+    return false;
   }
   if (firstRowWidth !== width) {
     console.warn(`Number of sampleAnnotationLabels (${width}) does not match number of columns for first row`);
+    return false;
   }
+  return true;
 }
 
 const calculatePlotHeight = (nRows: number) => 600 + Math.max(0, nRows - 40) * 10;
 
-const ExpressionHeatmap = ({ heatmapData: heatmapDataInput, hideLoader }: ExpressionHeatmapProps) => {
+/**
+ * Dumb component taking in expected data for heatmap
+ */
+const ExpressionHeatmap = ({ heatmapData, hideLoader }: ExpressionHeatmapProps) => {
 
   const [ scrollZoomable, setScrollZoomable ] = useState(false);
-  const handleScrollZoomableToggle = () => {
-    setScrollZoomable(!scrollZoomable);
-  };
+  const [ normalizeRows, setNormalizeRows ] = useState(false);
 
-  const [ heatmapData, setHeatmapData ] = useState<HeatmapData>(generateDummyData(0, 0));
-  useEffect(() => {
-    if (heatmapDataInput) { validateHeatmapDataShape(heatmapDataInput) };
-    setHeatmapData(() => heatmapDataInput || generateDummyData(100, 20));
-  }, [heatmapDataInput]);
+  if (!heatmapData || isHeatmapDataShapeValid(heatmapData as unknown as HeatmapData)) {
+    return <p>Missing input to the heatmap</p>;
+  }
 
   const height = calculatePlotHeight(heatmapData.geneLabels.length);
+  const normTpmMatrix = heatmapData.tpmMatrix.map(row => {
+    const rowMax = Math.max(...row);
+    return rowMax ? math.divide(row, rowMax) : 0;
+  });
 
   const downloadIcon = {
     width: 500,
@@ -77,12 +70,26 @@ const ExpressionHeatmap = ({ heatmapData: heatmapDataInput, hideLoader }: Expres
 
   return (
     <div className="my-4">
+      <div className="my-3">
+        <Toggle
+          currState={scrollZoomable}
+          handleChange={() => setScrollZoomable(curr => !curr)}
+          prompt="Allow zoom on scroll"
+        />
+      </div>
+      <div className="my-3">
+        <Toggle
+          currState={normalizeRows}
+          handleChange={() => setNormalizeRows(curr => !curr)}
+          prompt="Normalize to each gene's max TPM"
+        />
+      </div>
       <Plot
         className="overflow-hidden border border-stone-300 rounded-2xl shadow-lg min-h-[600px] w-full"
         data={[
           {
             type: "heatmap",
-            z: heatmapData.tpmMatrix,
+            z: (normalizeRows ? normTpmMatrix : heatmapData.tpmMatrix),
             x: heatmapData.sampleAnnotationLabels,
             y: heatmapData.geneLabels,
           },
@@ -141,13 +148,6 @@ const ExpressionHeatmap = ({ heatmapData: heatmapDataInput, hideLoader }: Expres
         }}
         onInitialized={hideLoader}
       />
-      <div className="my-3">
-        <Toggle
-          currState={scrollZoomable}
-          handleChange={handleScrollZoomableToggle}
-          prompt="Allow zoom on scroll"
-        />
-      </div>
     </div>
   );
 }
