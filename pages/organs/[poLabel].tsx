@@ -1,6 +1,6 @@
 import Head from "next/head"
 import { useRouter } from "next/router"
-import React from "react"
+import React, { useContext } from "react"
 import Select from 'react-select'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
@@ -10,9 +10,11 @@ import Layout from "../../components/Layout"
 import OrganShowTableMedian from "../../components/tables/OrganShowTableMedian"
 import OrganShowTableMean from "../../components/tables/OrganShowTableMean"
 import { getOrganSpecificSasByMedian, getOrganSpecificSasByMean } from "../../utils/sampleAnnotations"
-import { getAllSpecies, getSpeciesHavingOrgan } from "../../utils/species"
+import { getSpeciesHavingOrgan } from "../../utils/species"
 import { TabGroup, TabHeaderGroup, TabHeaderItem, TabBodyGroup, TabBodyItem } from "../../components/atomic/tabs"
 import Species from "../../models/species"
+import TextLink from "../../components/atomic/TextLink"
+import { GlobalStoreContext } from "../_app"
 
 import poNameMap from '/public/data/po_name_map.json' assert {type: 'json'}
 
@@ -55,6 +57,9 @@ interface IProps {
 }
 
 const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult, topSpmByMeanResult }) => {
+
+  const { setNavigationPayload } = useContext(GlobalStoreContext);
+
   const router = useRouter()
   const poLabel = router.query.poLabel as string
   const capsPoName = poName.charAt(0).toUpperCase() + poName.slice(1).toLowerCase()
@@ -62,9 +67,20 @@ const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult
   const speciesOptions = species.map(sp => ({
     value: sp._id,
     label: sp.name,
+    taxid: sp.tax,
   }))
 
   const [ selectedSpecies, setSelectedSpecies ] = React.useState(speciesOptions[0])
+
+  const handleNavigateToHeatmap = (event, spmType: "mean" | "median") => {
+    event.preventDefault();
+    const taxid = selectedSpecies.taxid;
+    const payload = topSpmByMeanResult.sas
+      .map(sa => sa.gene.label)
+      .map(label => ({ taxid, label }));
+    setNavigationPayload(payload);
+    router.push("/heatmap");
+  }
 
   return (
     <Layout>
@@ -74,16 +90,29 @@ const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult
 
       <section className="mb-4">
         <Header1>{capsPoName}</Header1>
-        <p className="mb-1">{poLabel}</p>{/* TODO: explainer on plant ontology terms */}
-        <p className="mb-1">Explore genes that are expressed specifically in the {poName}.</p>
-        <p className="text-stone-500 text-sm italic">Context-specific expression is quantified with the SPM measure. The SPM is conventionally calculated by considering the mean TPM of each organ. However, this is prone to distortion due to extreme outliers. We provide the results from SPM using both mean and median here.</p>
+        <p className="mb-1">{poLabel}</p>
+        {/* TODO: explainer on plant ontology terms */}
+        <p className="mb-1">
+          Explore genes that are expressed specifically in the {poName}.
+        </p>
+        <p className="text-stone-500 text-sm italic">
+          Context-specific expression is quantified with the SPM measure. The
+          SPM is conventionally calculated by considering the mean TPM of each
+          organ. However, this is prone to distortion due to extreme outliers.
+          We provide the results from SPM using both mean and median here.
+        </p>
       </section>
 
       {/* TODO: Abstract the select box into a component */}
       <div className="my-3">
         <div className="flex items-center mb-2">
           <FontAwesomeIcon icon={faMagnifyingGlass} />
-          <label htmlFor="speciesSelect" className="block ml-1.5 text-sm font-medium text-gray-900">Select a species</label>
+          <label
+            htmlFor="speciesSelect"
+            className="block ml-1.5 text-sm font-medium text-gray-900"
+          >
+            Select a species
+          </label>
         </div>
         {/* <p>Selected species taxid: {JSON.stringify(selectedSpecies)}</p>
         <p>Selected species taxid: {JSON.stringify(selectedSpeciesId)}</p> */}
@@ -92,8 +121,7 @@ const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult
           options={speciesOptions}
           noOptionsMessage={() => "No such species"}
           onChange={(choice) => {
-            console.log(choice)
-            setSelectedSpecies(choice)
+            setSelectedSpecies(choice);
           }}
           closeMenuOnScroll={true}
           closeMenuOnSelect={true}
@@ -126,6 +154,15 @@ const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult
         </TabHeaderGroup>
         <TabBodyGroup>
           <TabBodyItem key="spm-mean" tabIndex={0}>
+            <div className="my-4">
+              <TextLink
+                href={"#"}
+                onClick={(e) => handleNavigateToHeatmap(e, "mean")}
+                className="italic"
+              >
+                Checkout heatmap of top 50 genes
+              </TextLink>
+            </div>
             <OrganShowTableMean
               poLabel={poLabel}
               speciesId={selectedSpecies.value}
@@ -134,6 +171,15 @@ const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult
             />
           </TabBodyItem>
           <TabBodyItem key="spm-median" tabIndex={1}>
+            <div className="my-4">
+              <TextLink
+                href={"#"}
+                onClick={(e) => handleNavigateToHeatmap(e, "median")}
+                className="italic"
+              >
+                Checkout heatmap of top 50 genes
+              </TextLink>
+            </div>
             <OrganShowTableMedian
               poLabel={poLabel}
               speciesId={selectedSpecies.value}
@@ -144,7 +190,7 @@ const OrganShowPage: NextPage<IProps> = ({ poName, species, topSpmByMedianResult
         </TabBodyGroup>
       </TabGroup>
     </Layout>
-  )
+  );
 }
 
 export default OrganShowPage
