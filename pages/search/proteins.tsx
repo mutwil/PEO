@@ -7,6 +7,12 @@ import Layout from '../../components/Layout'
 import ProteinSearchBox from '../../components/search/ProteinSearchBox'
 import ProteinResultTable from '../../components/tables/ProteinResultTable'
 
+enum QueryStatus {
+  FAILED = "failed",
+  SEARCHING = "searching",
+  SUCCESS = "success",
+}
+
 export async function getServerSideProps(context) {
   return {
     props: {
@@ -17,14 +23,19 @@ export async function getServerSideProps(context) {
 
 const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
   const [ results, setResults ] = React.useState([])
-  const [ queryStatus, setQueryStatus ] = React.useState(null)
+  const [ queryStatus, setQueryStatus ] = React.useState<QueryStatus | null>(null)
+
+  const handleFailure = (err) => {
+    setQueryStatus(QueryStatus.FAILED)
+    console.log(err)
+  }
 
   /*
     STEP 1: Query the diamond search API (FastAPI)
     to get the diamond hits for this protein sequence
   */
   const submitSearchQuery = async (query: string) => {
-    setQueryStatus("searching")
+    setQueryStatus(QueryStatus.SEARCHING)
     fetch(
       `${DIAMOND_URL}/queries/proteins/wait`, {
         method: "POST",
@@ -40,7 +51,7 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
       .then(data=>{
         processAndSetResults(data.result, data.status)
       })
-      .catch(err=>console.log(err))
+      .catch(err => handleFailure(err))
   }
 
   /*
@@ -71,12 +82,10 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
             gene_names: names[i].names,
           }
         })
-
-        console.log(newResults)
         setResults(newResults)
-        setQueryStatus(status)
+        setQueryStatus(QueryStatus.SUCCESS)
       })
-      .catch(err=>console.log(err))
+      .catch(err => handleFailure(err))
   }
 
   const columns = React.useMemo(
@@ -154,15 +163,18 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
       </section>
 
       <section>
-        {queryStatus
-          ? (queryStatus === "searching")
-            ? "Searching up your protein sequence ..."
-            : <ProteinResultTable columns={columns} data={results} />
-          : null
-        }
+        {queryStatus && queryStatus === QueryStatus.SEARCHING && (
+          <p className="my-3">Searching up your protein sequence ...</p>
+        )}
+        {queryStatus && queryStatus === QueryStatus.SUCCESS && (
+          <ProteinResultTable columns={columns} data={results} />
+        )}
+        {queryStatus && queryStatus === QueryStatus.FAILED && (
+          <p className="my-3">Failed to search your protein sequence ...</p>
+        )}
       </section>
     </Layout>
-  )
+  );
 }
 
 export default ProteinSearchPage
