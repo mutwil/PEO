@@ -5,7 +5,7 @@ const ProteinSearchBox = ({submitSearchQuery}) => {
   const handleSubmit = (event) => {
     event.preventDefault()
     const cleanedSeq: string = event.target.proteinSeq.value
-      .replace(/\s*/g, "")
+      .replace(/>|\s*/g, "")
       .toUpperCase()
     const cleanedSeqSet = new Set(cleanedSeq)
     const validAA = new Set("ARNDCQEGHILKMFPSTWYV")
