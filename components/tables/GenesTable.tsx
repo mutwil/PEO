@@ -26,12 +26,11 @@ const GenesTable: React.FC<IProps> = ({ taxid, initialGenes, pageTotal }) => {
       ),
       disableSortBy: true,
     },
-    /* No Alias stored in DB yet for now, so leaving it out first */
-    // {
-    //   Header: "Alias",
-    //   accessor: "alias",
-    //   disableSortBy: true,
-    // },
+    {
+      Header: "Alias",
+      accessor: "alias",
+      disableSortBy: true,
+    },
     {
       Header: "Mapman annotations",
       accessor: "geneAnnotations",
