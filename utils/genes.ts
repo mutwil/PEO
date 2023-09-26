@@ -29,6 +29,7 @@ export const getGenesPage = async ({
   /*
     We want to search for genes where queryFilter matches:
     - gene label
+    - alias
     - or the Mapman term name
 
     We also no longer care about sorting (for efficiency)
@@ -74,7 +75,7 @@ export const getGenesPage = async ({
         "$or": [
           { label: { "$regex": new RegExp(queryFilter), "$options": "i" } },
           { mapmanNames: { "$regex": new RegExp(queryFilter), "$options": "i" } },
-          // TODO: also match alias if we have alias in future
+          { alias: { "$regex": new RegExp(queryFilter), "$options": "i" } },
         ]
       }
     },
