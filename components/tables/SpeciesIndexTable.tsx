@@ -22,6 +22,14 @@ const SpeciesIndexTable = ({ data }) => {
         accessor: "name",
       },
       {
+        Header: "Number of Samples",
+        accessor: "n_samples",
+      },
+      {
+        Header: "Number of Annotated Samples",
+        accessor: "n_annotated_samples",
+      },
+      {
         Header: "Source",
         accessor: "cds.source",
       },
