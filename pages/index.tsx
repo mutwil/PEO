@@ -1,4 +1,6 @@
-import type { NextPage } from 'next'
+import type { NextPage, GetStaticProps } from 'next'
+import connectMongo from '../utils/connectMongo'
+import Species from '../models/species'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,7 +10,7 @@ import Layout from '../components/Layout'
 import SearchBox from '../components/search/SearchBox'
 import TextLink from '../components/atomic/TextLink'
 
-const Home: NextPage = () => {
+const Home: NextPage<{ speciesCount: number }> = ({ speciesCount }) => {
   const router = useRouter()
 
   const getGenesSuggestions = async (query) => {
@@ -44,7 +46,7 @@ const Home: NextPage = () => {
             The largest annotated gene expression resource for{" "}
             <Link href="/species">
               <a className="hover:underline active:text-plb-green">
-                <span className="font-bold text-xl text-plb-red">100</span> plant species
+                <span className="font-bold text-xl text-plb-red">{speciesCount}</span> plant species
               </a>
             </Link>
           </p>
@@ -96,6 +98,16 @@ const Home: NextPage = () => {
       </section>
     </Layout>
   )
+}
+
+
+export const getStaticProps: GetStaticProps = async () => {
+  await connectMongo()
+  const speciesCount = await Species.estimatedDocumentCount()
+  return {
+    props: { speciesCount },
+    revalidate: 3600,  // re-fetch the count at most once per hour
+  }
 }
 
 export default Home
