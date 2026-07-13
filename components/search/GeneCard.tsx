@@ -1,9 +1,15 @@
 import React from "react"
 import Link from "next/link"
 
+interface AliasEntry {
+  label: string
+  pident?: number
+  evalue?: number
+}
+
 interface IProps {
   label: string
-  alias: string[]
+  alias: (string | AliasEntry)[]
   speciesName: string
   taxid: number
 }
@@ -27,7 +33,7 @@ const GeneCard: React.FC<IProps> = ({ label, alias, speciesName, taxid }) => {
         Species: <span className="italic">{speciesName}</span> (Tax ID {taxid})
       </p>
       <p className="">
-        <span>Alias: </span><span>{alias.length ? alias : "-"}</span>
+        <span>Alias: </span><span>{alias.length ? alias.map(a => typeof a === "string" ? a : a.label).join(", ") : "-"}</span>
       </p>
     </div>
   )
