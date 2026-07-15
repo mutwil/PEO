@@ -29,6 +29,13 @@ const GenesTable: React.FC<IProps> = ({ taxid, initialGenes, pageTotal }) => {
     {
       Header: "Alias",
       accessor: "alias",
+      Cell: ({ value: alias }: { value: (string | { label: string; pident?: number; evalue?: number })[] }) => (
+        <span>
+          {alias && alias.length
+            ? alias.map(a => typeof a === "string" ? a : a.label).join(", ")
+            : "-"}
+        </span>
+      ),
       disableSortBy: true,
     },
     {
