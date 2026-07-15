@@ -46,6 +46,14 @@ const SearchBox = ({
   const suggestionBoxRef = React.useRef(null)
   useOutsideAlerter(suggestionBoxRef, () => {setSuggestActive(false)})
 
+  /*
+   * Requests can resolve out of order (a fast response for an earlier,
+   * now-stale keystroke can arrive after a slower response for the latest
+   * one). Track a monotonically increasing request id and only apply the
+   * response if it's still the most recent request fired.
+   */
+  const latestRequestIdRef = React.useRef(0)
+
   React.useEffect(() => {
     setButtonDisabled(isLoadingResults)
   }, [isLoadingResults])
@@ -73,9 +81,14 @@ const SearchBox = ({
 
   const updateSuggestions = React.useCallback(
     debounce(async (query: string) => {
+      const requestId = ++latestRequestIdRef.current
       setIsUpdatingSuggestions(true)
-      console.log(`Querying suggestions for: ${query} ...`)
-      setSuggestions(await getSuggestions(query))
+      const results = await getSuggestions(query)
+      // Discard this response if a newer request has since been fired —
+      // otherwise a slow response for an earlier keystroke can overwrite
+      // the correct suggestions for what the user has typed since.
+      if (requestId !== latestRequestIdRef.current) return
+      setSuggestions(results)
       setIsUpdatingSuggestions(false)
     }, 500),
     [],

@@ -5,6 +5,24 @@ import Gene from "../models/gene"
 import connectMongo from "../utils/connectMongo"
 import GeneAnnotation from "../models/geneAnnotation"
 
+/* Collation used for all case-insensitive prefix searches below —
+   must match the collation the label_ci / alias_label_ci indexes were built with */
+const CASE_INSENSITIVE_COLLATION = { locale: "en", strength: 2 }
+
+/*
+  Build a MongoDB range filter for a case-insensitive PREFIX match on `field`,
+  e.g. prefixFilter("label", "at5g4") matches any label starting with "at5g4"
+  (any case). Must be combined with .collation(CASE_INSENSITIVE_COLLATION) on
+  the query for the case-insensitivity to actually apply — that's what lets
+  Mongo use the label_ci / alias_label_ci indexes via a real index seek
+  instead of a full collection scan (unanchored/case-insensitive regex can't
+  use an index at all: on the 6.3M-doc genes collection that was a 15-30s
+  scan per keystroke).
+*/
+const prefixFilter = (field: string, term: string) => ({
+  [field]: { $gte: term, $lt: term + "￿" },
+})
+
 interface GenesPageInputArgs {
   taxid: number
   pageIndex: number
@@ -157,11 +175,9 @@ export const getGenesSearchPage = async (
   pageSize: number = parseInt(process.env.pageSize),
 ) => {
   connectMongo()
-  // const genes = await Gene.find({label: new RegExp(searchTerm, "i")}, "label alias")
-  //   .skip(pageIndex * pageSize)
-  //   .limit(pageSize)
-  const searchRegex = new RegExp(searchTerm, "i")
-  const searchFilter = {$or: [{label: searchRegex}, {"alias.label": searchRegex}]}
+  const searchFilter = {
+    $or: [prefixFilter("label", searchTerm), prefixFilter("alias.label", searchTerm)],
+  }
   const genes = await Gene.aggregate()
     .match(searchFilter)
     .skip(pageIndex * pageSize)
@@ -177,7 +193,8 @@ export const getGenesSearchPage = async (
     })
     .unwind("species")
     .project({label: 1, alias: 1, species: 1})
-  const numGenes = await Gene.countDocuments(searchFilter)
+    .collation(CASE_INSENSITIVE_COLLATION)
+  const numGenes = await Gene.countDocuments(searchFilter).collation(CASE_INSENSITIVE_COLLATION)
   const pageTotal = Math.ceil(numGenes / pageSize)
   return {
     pageIndex: pageIndex,
@@ -199,9 +216,10 @@ export const getGeneLabelsSearchPage = async (
 ) => {
   connectMongo()
   const genes = await Gene.find(
-    {$or: [{label: new RegExp(searchTerm, "i")}, {"alias.label": new RegExp(searchTerm, "i")}]},
+    {$or: [prefixFilter("label", searchTerm), prefixFilter("alias.label", searchTerm)]},
     "label alias"
   )
+    .collation(CASE_INSENSITIVE_COLLATION)
     .skip(pageIndex * pageSize)
     .limit(pageSize)
   return { genes }
