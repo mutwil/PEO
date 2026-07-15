@@ -29,12 +29,10 @@ const GenesTable: React.FC<IProps> = ({ taxid, initialGenes, pageTotal }) => {
     {
       Header: "Alias",
       accessor: "alias",
-      Cell: ({ value: alias }: { value: (string | { label: string; pident?: number; evalue?: number })[] }) => (
-        <span>
-          {alias && alias.length
-            ? alias.map(a => typeof a === "string" ? a : a.label).join(", ")
-            : "-"}
-        </span>
+      Cell: ({ value }: { value: {label: string, pident: number, evalue: number}[] }) => (
+        value && value.length > 0
+          ? <span>{value.map(a => `${a.label} (${a.pident}%, ${a.evalue.toExponential(1)})`).join(", ")}</span>
+          : <span>-</span>
       ),
       disableSortBy: true,
     },

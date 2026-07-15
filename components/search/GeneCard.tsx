@@ -3,13 +3,13 @@ import Link from "next/link"
 
 interface AliasEntry {
   label: string
-  pident?: number
-  evalue?: number
+  pident: number
+  evalue: number
 }
 
 interface IProps {
   label: string
-  alias: (string | AliasEntry)[]
+  alias: AliasEntry[]
   speciesName: string
   taxid: number
 }
@@ -32,9 +32,18 @@ const GeneCard: React.FC<IProps> = ({ label, alias, speciesName, taxid }) => {
       <p className="">
         Species: <span className="italic">{speciesName}</span> (Tax ID {taxid})
       </p>
-      <p className="">
-        <span>Alias: </span><span>{alias.length ? alias.map(a => typeof a === "string" ? a : a.label).join(", ") : "-"}</span>
-      </p>
+      {alias && alias.length > 0 && (
+        <div className="text-sm text-gray-500 mt-1">
+          <span>Also known as: </span>
+          {alias.map((a, i) => (
+            <span key={i}>
+              <span className="font-mono">{a.label}</span>
+              <span className="text-gray-400"> (pident: {a.pident}%, e-value: {a.evalue.toExponential(1)})</span>
+              {i < alias.length - 1 && ", "}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

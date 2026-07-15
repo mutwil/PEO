@@ -71,6 +71,18 @@ const GenePage: NextPage = ({species, gene, mapmanGas, interproGas, sampleAnnota
           <Header1>Gene {geneLabel}</Header1>
           <p>Species name: <span className="italic">{species.name}</span></p>
           <p>Taxanomic ID: {taxid}</p>
+          {gene.alias && gene.alias.length > 0 && (
+            <div className="text-sm text-gray-500 mt-1">
+              <span>Also known as: </span>
+              {gene.alias.map((a, i) => (
+                <span key={i}>
+                  <span className="font-mono">{a.label}</span>
+                  <span className="text-gray-400"> (pident: {a.pident}%, e-value: {a.evalue.toExponential(1)})</span>
+                  {i < gene.alias.length - 1 && ", "}
+                </span>
+              ))}
+            </div>
+          )}
         </section>
 
         <div className="flex italic text-sm gap-2 my-3">

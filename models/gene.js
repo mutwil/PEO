@@ -11,13 +11,19 @@ const neighborSchema = new Schema({
   pcc: Number,
 });
 
+const aliasSchema = new Schema({
+  label:  { type: String,  required: true },
+  pident: { type: Number,  required: true },
+  evalue: { type: Number,  required: true },
+}, { _id: false })
+
 const geneSchema = new Schema({
   label: {
     type: String,
     required: true,
   },
   alias: {
-    type: [String],
+    type: [aliasSchema],
     required: true,
     default: [],
   },

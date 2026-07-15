@@ -29,7 +29,6 @@ export const getGenesPage = async ({
   /*
     We want to search for genes where queryFilter matches:
     - gene label
-    - alias
     - or the Mapman term name
 
     We also no longer care about sorting (for efficiency)
@@ -74,8 +73,8 @@ export const getGenesPage = async ({
       "$match": {
         "$or": [
           { label: { "$regex": new RegExp(queryFilter), "$options": "i" } },
+          { "alias.label": { "$regex": new RegExp(queryFilter), "$options": "i" } },
           { mapmanNames: { "$regex": new RegExp(queryFilter), "$options": "i" } },
-          { alias: { "$regex": new RegExp(queryFilter), "$options": "i" } },
         ]
       }
     },
@@ -124,7 +123,7 @@ export const getOneGene = async (
   label: string,
 ) => {
   connectMongo()
-  const gene = await Gene.findOne({"spe_id": species_id, "label": label})
+  const gene = await Gene.findOne({"spe_id": species_id, "$or": [{"label": label}, {"alias.label": label}]})
     .populate("gene_annotations")
     .populate({
       path: "neighbors.gene",
@@ -161,8 +160,10 @@ export const getGenesSearchPage = async (
   // const genes = await Gene.find({label: new RegExp(searchTerm, "i")}, "label alias")
   //   .skip(pageIndex * pageSize)
   //   .limit(pageSize)
+  const searchRegex = new RegExp(searchTerm, "i")
+  const searchFilter = {$or: [{label: searchRegex}, {"alias.label": searchRegex}]}
   const genes = await Gene.aggregate()
-    .match({label: new RegExp(searchTerm, "i")})
+    .match(searchFilter)
     .skip(pageIndex * pageSize)
     .limit(pageSize)
     .lookup({
@@ -176,7 +177,7 @@ export const getGenesSearchPage = async (
     })
     .unwind("species")
     .project({label: 1, alias: 1, species: 1})
-  const numGenes = await Gene.countDocuments({label: new RegExp(searchTerm, "i")})
+  const numGenes = await Gene.countDocuments(searchFilter)
   const pageTotal = Math.ceil(numGenes / pageSize)
   return {
     pageIndex: pageIndex,
@@ -194,10 +195,13 @@ export const getGenesSearchPage = async (
 export const getGeneLabelsSearchPage = async (
   searchTerm: string,
   pageIndex: number = 0,
-  pageSize: number = parseInt(process.env.pageSize as string),
+  pageSize: number = parseInt(process.env.pageSize),
 ) => {
   connectMongo()
-  const genes = await Gene.find({label: new RegExp(searchTerm, "i")}, "label")
+  const genes = await Gene.find(
+    {$or: [{label: new RegExp(searchTerm, "i")}, {"alias.label": new RegExp(searchTerm, "i")}]},
+    "label alias"
+  )
     .skip(pageIndex * pageSize)
     .limit(pageSize)
   return { genes }
