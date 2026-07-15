@@ -15,10 +15,12 @@ export default async function handler(
         const hits = req.body
         // Call Next.js's API to get species name and _id
         const species = await getManySpecies(hits.map(hit => hit.taxid))
-        // TOFIX: What happens when there is a data mismatch
-        // between the diamond search db and our Mongo DB data?
+        // Not every DIAMOND hit necessarily has a matching species/gene doc in
+        // Mongo (e.g. sequence-ID conventions differ between the DIAMOND
+        // reference FASTA and the TPM-matrix-derived gene labels we store).
+        // Guard against null lookups instead of crashing the whole request.
         hits.forEach((hit, i) => {
-          if (species[i].tax === hit.taxid) {
+          if (species[i] && species[i].tax === hit.taxid) {
             hit.species_name = species[i].name
             hit.species_id = species[i]._id
           }
@@ -27,11 +29,13 @@ export default async function handler(
         // to retrieve MAPMAN annotations (if any)
         const genes = await getManyGenes(hits)
         hits.forEach((hit, i) => {
-          if (genes[i].label === hit.gene_label) {
+          if (genes[i] && genes[i].label === hit.gene_label) {
             // Find all MAPMAN annotations if any,
             // and add to the doc
             const mapman_gas = genes[i].gene_annotations.filter(ga => ga.type === "MAPMAN")
             hit.names = mapman_gas.map(ga => ga.name)
+          } else {
+            hit.names = []
           }
         })
         res.status(200).json(hits)
