@@ -133,6 +133,28 @@ export const getGenesPage = async ({
 }
 
 /*
+  Identifiers coming from protein (DIAMOND) search are the sequence IDs from
+  the 147_pep/ peptide FASTAs, which frequently carry an isoform/transcript
+  suffix the stored gene label does not — e.g. a hit reports AT3G01516.1
+  while the gene is stored as AT3G01516. Strip one trailing suffix so those
+  resolve.
+
+  Returns null when there is nothing to strip, so callers can skip a
+  redundant second query.
+
+  NOTE: this only recovers suffix mismatches. A number of species use a
+  wholly different ID namespace in their peptide FASTA than in their
+  expression data (e.g. Brassica juncea BjuO004312, Raphanus Rs219300),
+  and those genuinely have no expression record to link to — no amount of
+  string munging fixes that, it needs the DIAMOND DB rebuilt with matching
+  IDs or an explicit mapping.
+*/
+export const stripIsoformSuffix = (label: string): string | null => {
+  const stripped = label.replace(/\.(?:cds\d+|t\d+|p|\d+)$/i, "")
+  return stripped !== label && stripped.length > 0 ? stripped : null
+}
+
+/*
   To return a single gene doc with its associated docs
   For gene show page
  */
@@ -141,14 +163,19 @@ export const getOneGene = async (
   label: string,
 ) => {
   connectMongo()
-  const gene = await Gene.findOne({"spe_id": species_id, "$or": [{"label": label}, {"alias.label": label}]})
+  const query = (l: string) => Gene.findOne({"spe_id": species_id, "$or": [{"label": l}, {"alias.label": l}]})
     .populate("gene_annotations")
     .populate({
       path: "neighbors.gene",
       select: "label ga_ids",
       populate: "mapman_annotations",
     })
-  return gene
+
+  const gene = await query(label)
+  if (gene) return gene
+
+  const stripped = stripIsoformSuffix(label)
+  return stripped ? await query(stripped) : null
 }
 
 /*
@@ -265,12 +292,17 @@ export const getManyGenes = async (
         null for those hits, so the caller silently rendered no MAPMAN
         annotations for them rather than the ones that do exist.
       */
-      return await Gene.findOne({
+      const find = (l: string) => Gene.findOne({
         spe_id: hit.species_id,
-        $or: [{ label: hit.gene_label }, { "alias.label": hit.gene_label }],
+        $or: [{ label: l }, { "alias.label": l }],
       })
         .populate("gene_annotations")
         .lean()
+
+      const gene = await find(hit.gene_label)
+      if (gene) return gene
+      const stripped = stripIsoformSuffix(hit.gene_label)
+      return stripped ? await find(stripped) : null
     })
   )
   return results

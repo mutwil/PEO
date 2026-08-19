@@ -29,7 +29,21 @@ import { capitalizeFirstLetter } from "../../../../utils/strings"
 export const getServerSideProps: GetServerSideProps = async ({ params, query }) => {
   connectMongo()
   const species = await getOneSpecies(params.taxid)
+  /*
+    Both lookups can legitimately miss and must 404 rather than throw.
+    Protein (DIAMOND) search runs against the 147_pep/ peptide FASTAs, which
+    contain sequences for genes that have no expression record in PEO — and
+    for several species use a different ID namespace entirely — so hits can
+    link here for genes that simply do not exist in this database.
+    Dereferencing the null was returning a 500 for every such link.
+  */
+  if (!species) {
+    return { notFound: true }
+  }
   const gene = await getOneGene(species._id, params.geneLabel)
+  if (!gene) {
+    return { notFound: true }
+  }
   const mapmanGas = gene.gene_annotations.filter(ga => ga.type === "MAPMAN")
   const interproGas = gene.gene_annotations.filter(ga => ga.type === "INTERPRO")
   const sampleAnnotations = await getSampleAnnotationsGraphData(params.taxid, params.geneLabel, "PO")

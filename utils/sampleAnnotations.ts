@@ -7,6 +7,7 @@ import Species from "../models/species"
 import Gene from "../models/gene"
 import SampleAnnotation from "../models/sampleAnnotation"
 import connectMongo from "../utils/connectMongo"
+import { stripIsoformSuffix } from "./genes"
 import { getStdDev, getWhiskers } from "./stats"
 
 import * as poNameMap from '/public/data/po_name_map.json' assert {type: 'json'}
@@ -30,10 +31,17 @@ export const getSampleAnnotations = async (
     "Cannot read properties of null (reading '_id')", 500-ing the entire gene
     page for every alias-identified hit.
   */
-  const gene = await Gene.findOne(
-    { "spe_id": species._id, "$or": [{ "label": geneLabel }, { "alias.label": geneLabel }] },
+  const findGene = (l: string) => Gene.findOne(
+    { "spe_id": species._id, "$or": [{ "label": l }, { "alias.label": l }] },
     "_id"
   )
+  let gene = await findGene(geneLabel)
+  if (!gene) {
+    // Same isoform-suffix fallback getOneGene uses, so the expression graph
+    // resolves for the same identifiers the gene page itself accepts.
+    const stripped = stripIsoformSuffix(geneLabel)
+    if (stripped) gene = await findGene(stripped)
+  }
   if (!gene) return []
   const sas = await SampleAnnotation.find({
     "spe_id": species._id,

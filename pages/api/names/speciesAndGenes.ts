@@ -29,13 +29,32 @@ export default async function handler(
         // to retrieve MAPMAN annotations (if any)
         const genes = await getManyGenes(hits)
         hits.forEach((hit, i) => {
-          if (genes[i] && genes[i].label === hit.gene_label) {
-            // Find all MAPMAN annotations if any,
-            // and add to the doc
+          /*
+            Do NOT compare genes[i].label to hit.gene_label here. getManyGenes
+            resolves each hit by label OR alias OR isoform-stripped label, so a
+            successful match frequently has a *different* label than the hit
+            reported (e.g. hit CDY37514 resolves to gene GSBRNA2T00039197001).
+            The previous equality check silently discarded annotations for every
+            such gene.
+
+            resolved_label is the canonical label to link to — linking by the
+            raw DIAMOND identifier works only when it happens to match, whereas
+            the canonical label always resolves.
+
+            has_expression_data lets the results table render unresolvable hits
+            as plain text instead of links that 404: the DIAMOND database is
+            built from peptide FASTAs that contain genes absent from the
+            expression data, and for some species use a different ID namespace.
+          */
+          if (genes[i]) {
             const mapman_gas = genes[i].gene_annotations.filter(ga => ga.type === "MAPMAN")
             hit.names = mapman_gas.map(ga => ga.name)
+            hit.resolved_label = genes[i].label
+            hit.has_expression_data = true
           } else {
             hit.names = []
+            hit.resolved_label = null
+            hit.has_expression_data = false
           }
         })
         res.status(200).json(hits)

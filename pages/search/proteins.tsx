@@ -129,11 +129,32 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
       {
         Header: "Gene identifier",
         accessor: "target",
-        Cell: ({ value, row }) => (
-          <Link href={`/species/${row.values.taxid}/genes/${value}`}>
-            <a className="hover:underline text-plb-green active:text-plb-red">{value}</a>
-          </Link>
-        ),
+        Cell: ({ value, row }) => {
+          /*
+            Only link hits that actually resolve to a gene in the expression
+            database. The DIAMOND database is built from peptide FASTAs that
+            include sequences with no expression record here (and for some
+            species use a different gene-ID namespace entirely), so linking
+            every hit produced dead links. Link via resolved_label, which is
+            the canonical gene label and always resolves.
+          */
+          const original = row.original ?? {}
+          if (!original.has_expression_data) {
+            return (
+              <span
+                className="text-stone-500"
+                title="This protein has no expression data in PEO, so there is no gene page to open."
+              >
+                {value}
+              </span>
+            )
+          }
+          return (
+            <Link href={`/species/${row.values.taxid}/genes/${original.resolved_label ?? value}`}>
+              <a className="hover:underline text-plb-green active:text-plb-red">{value}</a>
+            </Link>
+          )
+        },
       },
       /* Hide this column "taxid" under `setInitialState` in `useTable` hook call */
       {
