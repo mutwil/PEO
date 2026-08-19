@@ -157,31 +157,49 @@ export const getGenesPage = async ({
 */
 export const normaliseGeneLabel = (label: string): string => label.toUpperCase()
 
-export const stripIsoformSuffix = (label: string): string | null => {
-  // Repeat until stable: suffixes stack (…​.1.p -> …​.1 -> …)
-  let prev: string | null = null
+const SUFFIX_RE = /\.(?:cds\d+|t\d+|mrna\d*|p|\d+)$/i
+
+/*
+  Every progressively-stripped form, longest first — NOT just the fully
+  stripped one. Which level is correct varies by species and cannot be
+  guessed from the identifier alone:
+
+    Arabidopsis halleri  g02634.t1.cds1      -> DB has G02634.T1   (one level)
+    Camelina sativa      Csa19g001420.1.cds1 -> DB has CSA19G001420.1
+    Setaria italica      Seita.9G115300.1.p  -> DB has SEITA.9G115300 (two levels)
+    Ananas comosus       Aco002306.1.mrna1   -> DB keeps the whole thing
+
+  Returning only the fully-stripped form silently missed the intermediate
+  matches (7 of 50 hits in a sample protein search).
+*/
+export const strippedForms = (label: string): string[] => {
+  const forms: string[] = []
   let cur = label
-  while (cur !== prev) {
-    prev = cur
-    cur = cur.replace(/\.(?:cds\d+|t\d+|mrna\d*|p|\d+)$/i, "")
+  while (true) {
+    const next = cur.replace(SUFFIX_RE, "")
+    if (next === cur || next.length === 0) break
+    forms.push(next)
+    cur = next
   }
-  return cur !== label && cur.length > 0 ? cur : null
+  return forms
 }
 
 /*
-  Candidate lookup forms for a user- or DIAMOND-supplied identifier, in
-  decreasing order of confidence. De-duplicated so callers don't run the same
-  query twice.
+  Candidate lookup forms for a user- or DIAMOND-supplied identifier, most
+  specific first, de-duplicated so callers don't run the same query twice.
+  Order matters: the un-stripped uppercase form must be tried before any
+  stripped form, because some species legitimately keep the suffix in the
+  stored label.
 */
 export const geneLabelCandidates = (label: string): string[] => {
-  const candidates = [label]
   const upper = normaliseGeneLabel(label)
-  if (upper !== label) candidates.push(upper)
-  const strippedUpper = stripIsoformSuffix(upper)
-  if (strippedUpper) candidates.push(strippedUpper)
-  const strippedRaw = stripIsoformSuffix(label)
-  if (strippedRaw && !candidates.includes(strippedRaw)) candidates.push(strippedRaw)
-  return candidates
+  const ordered = [
+    label,
+    upper,
+    ...strippedForms(upper),
+    ...strippedForms(label),
+  ]
+  return ordered.filter((v, i) => v.length > 0 && ordered.indexOf(v) === i)
 }
 
 /*
