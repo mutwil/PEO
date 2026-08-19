@@ -190,14 +190,27 @@ export const strippedForms = (label: string): string[] => {
   Order matters: the un-stripped uppercase form must be tried before any
   stripped form, because some species legitimately keep the suffix in the
   stored label.
+
+  Pipe handling: the DIAMOND reference now stores the full whitespace-delimited
+  header token, so an identifier may legitimately contain '|'. Which part is the
+  gene ID depends on the species, so try both:
+    Cyanophora  Cpa|evm.model.tig00000017.1        -> whole thing is the ID
+    Selaginella 402070|PACid:15401278              -> whole thing (maps via alias)
+    Cicer       Ca_00001.1|Ca_LG_1:6359-6790|plus| -> only the prefix is the ID
+  Previously the DIAMOND build split on '|' itself, which silently truncated
+  Cyanophora's 24,702 sequences to the single ID "Cpa".
 */
 export const geneLabelCandidates = (label: string): string[] => {
   const upper = normaliseGeneLabel(label)
+  const pipePrefix = label.includes("|") ? label.split("|")[0] : null
+  const pipePrefixUpper = pipePrefix ? normaliseGeneLabel(pipePrefix) : null
   const ordered = [
     label,
     upper,
     ...strippedForms(upper),
     ...strippedForms(label),
+    ...(pipePrefix ? [pipePrefix, pipePrefixUpper as string,
+                      ...strippedForms(pipePrefixUpper as string)] : []),
   ]
   return ordered.filter((v, i) => v.length > 0 && ordered.indexOf(v) === i)
 }
