@@ -112,6 +112,10 @@
     "binname": "Plant reproduction"
   },
   {
+    "bincode": 29,
+    "binname": "Plant organogenesis"
+  },
+  {
     "bincode": 30,
     "binname": "Clade-specific metabolism"
   },
