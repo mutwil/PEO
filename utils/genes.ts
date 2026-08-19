@@ -257,7 +257,18 @@ export const getManyGenes = async (
   connectMongo()
   const results = Promise.all(
     hits.map(async (hit) => {
-      return await Gene.findOne({ spe_id: hit.species_id, label: hit.gene_label })
+      /*
+        Match alias.label too: DIAMOND hits carry the identifier from the
+        peptide FASTA, which for many species differs from the primary
+        `label` (e.g. Brassica napus reports CDY… while Mongo stores
+        GSBRNA2T…, with CDY… in `alias`). Matching on label alone returned
+        null for those hits, so the caller silently rendered no MAPMAN
+        annotations for them rather than the ones that do exist.
+      */
+      return await Gene.findOne({
+        spe_id: hit.species_id,
+        $or: [{ label: hit.gene_label }, { "alias.label": hit.gene_label }],
+      })
         .populate("gene_annotations")
         .lean()
     })

@@ -19,10 +19,22 @@ export const getSampleAnnotations = async (
 ) => {
   connectMongo()
   const species = await Species.findOne({ "tax": taxid }, "_id")
+  if (!species) return []
+  /*
+    Match alias.label as well as label, the same way getOneGene does.
+    Protein (DIAMOND) search results link here using whatever identifier the
+    peptide FASTA used, which for many species is NOT the TPM-matrix-derived
+    `label` stored as primary — e.g. Brassica napus genes are labelled
+    GSBRNA2T… in Mongo, but a DIAMOND hit reports CDY…, which lives in
+    `alias`. Looking up by label alone returned null and then threw
+    "Cannot read properties of null (reading '_id')", 500-ing the entire gene
+    page for every alias-identified hit.
+  */
   const gene = await Gene.findOne(
-    { "spe_id": species._id, "label": geneLabel },
+    { "spe_id": species._id, "$or": [{ "label": geneLabel }, { "alias.label": geneLabel }] },
     "_id"
   )
+  if (!gene) return []
   const sas = await SampleAnnotation.find({
     "spe_id": species._id,
     "g_id": gene._id,
