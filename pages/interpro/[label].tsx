@@ -11,6 +11,12 @@ import { getOneGeneAnnotation } from "../../utils/geneAnnotations"
 export const getServerSideProps: GetServerSideProps = async ({ params, query }) => {
   const geneAnnotation = await getOneGeneAnnotation({ type: "INTERPRO", label: params.label })
 
+  // Unknown/retired PFAM accession must 404 rather than 500 — same fix as the
+  // MapMan bin page.
+  if (!geneAnnotation) {
+    return { notFound: true }
+  }
+
   return {
     props: {
       geneAnnotation: JSON.parse(JSON.stringify(geneAnnotation))

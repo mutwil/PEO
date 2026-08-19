@@ -12,6 +12,18 @@ import MapmanShowTable from "../../components/tables/MapmanShowTable"
 export const getServerSideProps: GetServerSideProps = async ({ params, query }) => {
   const geneAnnotation = await getOneGeneAnnotation({ type: "MAPMAN", label: params.label })
 
+  /*
+    A bin code that isn't in the database must 404, not 500. This is reachable
+    in normal use: MapMan bin codes change between Mercator releases, and PEO
+    v0.2 removed 1015 bins that no gene is assigned to (Mercator's new Bin 29
+    "Plant organogenesis" absorbed many former Bin 28 genes). Old links, cached
+    search results and the reviewer's bookmarks all still point at those codes,
+    and dereferencing the null here returned a server error for every one.
+  */
+  if (!geneAnnotation) {
+    return { notFound: true }
+  }
+
   return {
     props: {
       geneAnnotation: JSON.parse(JSON.stringify(geneAnnotation))
