@@ -7,7 +7,7 @@ import Species from "../models/species"
 import Gene from "../models/gene"
 import SampleAnnotation from "../models/sampleAnnotation"
 import connectMongo from "../utils/connectMongo"
-import { stripIsoformSuffix } from "./genes"
+import { geneLabelCandidates } from "./genes"
 import { getStdDev, getWhiskers } from "./stats"
 
 import * as poNameMap from '/public/data/po_name_map.json' assert {type: 'json'}
@@ -35,12 +35,13 @@ export const getSampleAnnotations = async (
     { "spe_id": species._id, "$or": [{ "label": l }, { "alias.label": l }] },
     "_id"
   )
-  let gene = await findGene(geneLabel)
-  if (!gene) {
-    // Same isoform-suffix fallback getOneGene uses, so the expression graph
-    // resolves for the same identifiers the gene page itself accepts.
-    const stripped = stripIsoformSuffix(geneLabel)
-    if (stripped) gene = await findGene(stripped)
+  // Same candidate list getOneGene uses (raw, uppercased, suffix-stripped), so
+  // the expression graph resolves for exactly the identifiers the gene page
+  // itself accepts — otherwise the page renders but its graph silently empties.
+  let gene = null
+  for (const candidate of geneLabelCandidates(geneLabel)) {
+    gene = await findGene(candidate)
+    if (gene) break
   }
   if (!gene) return []
   const sas = await SampleAnnotation.find({
