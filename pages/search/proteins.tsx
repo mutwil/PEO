@@ -6,6 +6,7 @@ import type { NextPage } from 'next'
 import Layout from '../../components/Layout'
 import ProteinSearchBox from '../../components/search/ProteinSearchBox'
 import ProteinResultTable from '../../components/tables/ProteinResultTable'
+import SearchProgress from '../../components/search/SearchProgress'
 
 enum QueryStatus {
   FAILED = "failed",
@@ -24,9 +25,12 @@ export async function getServerSideProps(context) {
 const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
   const [ results, setResults ] = React.useState([])
   const [ queryStatus, setQueryStatus ] = React.useState<QueryStatus | null>(null)
+  const [ errorMessage, setErrorMessage ] = React.useState<string | null>(null)
+  const [ lastSearchSeconds, setLastSearchSeconds ] = React.useState<number | null>(null)
 
-  const handleFailure = (err) => {
+  const handleFailure = (err, message?: string) => {
     setQueryStatus(QueryStatus.FAILED)
+    setErrorMessage(message ?? null)
     console.log(err)
   }
 
@@ -36,6 +40,8 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
   */
   const submitSearchQuery = async (query: string) => {
     setQueryStatus(QueryStatus.SEARCHING)
+    setErrorMessage(null)
+    setLastSearchSeconds(null)
     fetch(
       `${DIAMOND_URL}/queries/proteins/wait`, {
         method: "POST",
@@ -47,11 +53,41 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
         },
       }
     )
-      .then(res=>res.json())
-      .then(data=>{
+      .then(async res => {
+        /*
+          The search service returns structured errors for the cases users
+          actually hit, so surface those rather than a generic failure:
+            503 - another search is already running (searches are serialised,
+                  since one saturates the server's 2 CPUs)
+            504 - the search itself exceeded the server-side time limit
+            422 - the sequence failed validation
+        */
+        if (!res.ok) {
+          let detail = ""
+          try {
+            detail = (await res.json())?.detail ?? ""
+          } catch { /* non-JSON error body; fall through to generic message */ }
+
+          if (res.status === 503) {
+            throw new Error(detail || "Another protein search is currently running. Please try again in a minute.")
+          }
+          if (res.status === 504) {
+            throw new Error("The search took too long and was stopped. Very long or low-complexity sequences can exceed the time limit — try a shorter or more specific sequence.")
+          }
+          if (res.status === 422) {
+            throw new Error(detail || "That sequence could not be read as a protein sequence.")
+          }
+          throw new Error(detail || `Search failed (HTTP ${res.status}).`)
+        }
+        return res.json()
+      })
+      .then(data => {
+        if (typeof data.elapsed_seconds === "number") {
+          setLastSearchSeconds(data.elapsed_seconds)
+        }
         processAndSetResults(data.result, data.status)
       })
-      .catch(err => handleFailure(err))
+      .catch(err => handleFailure(err, err?.message))
   }
 
   /*
@@ -164,13 +200,25 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
 
       <section>
         {queryStatus && queryStatus === QueryStatus.SEARCHING && (
-          <p className="my-3">Searching up your protein sequence ...</p>
+          <SearchProgress />
         )}
         {queryStatus && queryStatus === QueryStatus.SUCCESS && (
-          <ProteinResultTable columns={columns} data={results} />
+          <>
+            {lastSearchSeconds !== null && (
+              <p className="my-3 text-sm text-stone-500">
+                Found {results.length} match{results.length === 1 ? "" : "es"} in {lastSearchSeconds}s.
+              </p>
+            )}
+            <ProteinResultTable columns={columns} data={results} />
+          </>
         )}
         {queryStatus && queryStatus === QueryStatus.FAILED && (
-          <p className="my-3">Failed to search your protein sequence ...</p>
+          <div className="my-3 p-4 border border-red-200 bg-red-50 rounded-lg">
+            <p className="font-medium text-red-800">Search failed</p>
+            <p className="text-sm text-red-700 mt-1">
+              {errorMessage ?? "Something went wrong while searching your protein sequence."}
+            </p>
+          </div>
         )}
       </section>
     </Layout>

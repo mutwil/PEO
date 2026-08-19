@@ -89,14 +89,13 @@ export default function Layout({ children }) {
           >
             Mutwil Lab
           </a>{" "}
-          🌱 , NTU Singapore
+          🌱 , University of Copenhagen
         </div>
-        <div className="bg-amber-300/50 text-center px-3 py-3">
-          <p className="text-sm">
-            🚧👷🏻 We are in alpha testing.{" "}
+        <div className="text-center px-3 pb-3">
+          <p className="text-sm text-stone-500">
             <TextLink href="https://forms.gle/AbVGtaGe8CxtmR8q9" target="_blank">
               Give your feedback
-            </TextLink>.
+            </TextLink>
           </p>
         </div>
       </footer>

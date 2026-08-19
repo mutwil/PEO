@@ -56,13 +56,18 @@ const ProteinSearchBox = ({submitSearchQuery}) => {
               </TextLink>
             </div>
           </div>
-          <div className="">
+          <div className="text-right">
             <button
               type="submit"
               className="text-xl text-plb-light bg-plb-green hover:bg-plb-dark-green focus:outline-none focus:ring-4 focus:ring-green-300 rounded-full px-6 py-3 text-center"
               >
               Search
             </button>
+            {/* Set expectations before the click, not only after — a DIAMOND
+                search against 5.1M sequences is inherently slow. */}
+            <p className="text-sm text-stone-500 mt-2 whitespace-nowrap">
+              Takes 25–60 seconds
+            </p>
           </div>
         </div>
       </div>
