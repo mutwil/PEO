@@ -116,6 +116,16 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
             ...old_result,
             species_name: names[i].species_name,
             gene_names: names[i].names,
+            /*
+              These two drive whether the identifier renders as a link (see the
+              "Gene identifier" column below) and must be carried over
+              explicitly — the spread above covers the DIAMOND hit, not the
+              resolution result. Omitting them left has_expression_data
+              undefined on every row, so the guard treated every hit as
+              unresolvable and the whole results table rendered without links.
+            */
+            has_expression_data: names[i].has_expression_data,
+            resolved_label: names[i].resolved_label,
           }
         })
         setResults(newResults)
