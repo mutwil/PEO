@@ -206,14 +206,6 @@ const ProteinSearchPage: NextPage = ({ DIAMOND_URL }) => {
         Header: "Alignment length",
         accessor: "algn_length",
       },
-      {
-        Header: "Mismatches",
-        accessor: "mismatches",
-      },
-      {
-        Header: "Gap openings",
-        accessor: "gap_openings",
-      },
     ], []
   )
 
