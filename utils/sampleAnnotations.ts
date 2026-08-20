@@ -66,7 +66,7 @@ export const getHighestSpmSA = async (
     highestSpm = sas.reduce(
       (prev, curr) => prev.spm > curr.spm ? prev : curr
     )
-    highestSpm.labelName = poNameMap[highestSpm.label]
+    highestSpm.labelName = poNameMap[highestSpm.label] ?? highestSpm.label
   }
   return highestSpm
 }
@@ -100,7 +100,14 @@ export const getSampleAnnotationsGraphData = async (
 ) => {
   const sampleAnnotations = await getSampleAnnotations(taxid, geneLabel, type)
   sampleAnnotations.forEach(sa => {
-    sa.name = poNameMap[sa.label]
+    /*
+      Fall back to the raw label when the PO term has no map entry. Not every
+      stored label is an ontology term — "UNCLASSIFIED" is used by Betula
+      pendula and Canna indica (57,574 sample annotations) and isn't in
+      po_name_map.json, which left sa.name undefined and 500'd every gene page
+      where it reached the top-3 SPM organs.
+    */
+    sa.name = poNameMap[sa.label] ?? sa.label
     sa.tpms = sa.samples.map((sample: object): number => sample.tpm)
     sa.sampleLabels = sa.samples.map((sample: object): string => sample.label)
     sa.sd = getStdDev(sa.tpms)
