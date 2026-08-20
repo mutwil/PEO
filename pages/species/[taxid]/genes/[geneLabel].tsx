@@ -25,6 +25,7 @@ import {
 import { getOneSpecies } from "../../../../utils/species"
 import { getOneGene } from "../../../../utils/genes"
 import { capitalizeFirstLetter } from "../../../../utils/strings"
+import { aliasStatsSuffix } from "../../../../utils/alias"
 
 export const getServerSideProps: GetServerSideProps = async ({ params, query }) => {
   connectMongo()
@@ -91,7 +92,7 @@ const GenePage: NextPage = ({species, gene, mapmanGas, interproGas, sampleAnnota
               {gene.alias.map((a, i) => (
                 <span key={i}>
                   <span className="font-mono">{a.label}</span>
-                  <span className="text-gray-400"> (pident: {a.pident}%, e-value: {a.evalue.toExponential(1)})</span>
+                  <span className="text-gray-400">{aliasStatsSuffix(a)}</span>
                   {i < gene.alias.length - 1 && ", "}
                 </span>
               ))}

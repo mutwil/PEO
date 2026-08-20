@@ -1,5 +1,6 @@
 import React from "react"
 import Link from "next/link"
+import { aliasStatsSuffix } from "../../utils/alias"
 
 interface AliasEntry {
   label: string
@@ -38,7 +39,7 @@ const GeneCard: React.FC<IProps> = ({ label, alias, speciesName, taxid }) => {
           {alias.map((a, i) => (
             <span key={i}>
               <span className="font-mono">{a.label}</span>
-              <span className="text-gray-400"> (pident: {a.pident}%, e-value: {a.evalue.toExponential(1)})</span>
+              <span className="text-gray-400">{aliasStatsSuffix(a)}</span>
               {i < alias.length - 1 && ", "}
             </span>
           ))}

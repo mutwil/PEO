@@ -2,6 +2,7 @@ import React from "react"
 
 import TextLink from "../atomic/TextLink"
 import VirtualPaginatedFilterTable, { IPropsFetchData } from "./generics/VirtualPaginatedFilterTable"
+import { aliasStatsSuffix } from "../../utils/alias"
 
 interface IProps {
   taxid: number
@@ -31,7 +32,7 @@ const GenesTable: React.FC<IProps> = ({ taxid, initialGenes, pageTotal }) => {
       accessor: "alias",
       Cell: ({ value }: { value: {label: string, pident: number, evalue: number}[] }) => (
         value && value.length > 0
-          ? <span>{value.map(a => `${a.label} (${a.pident}%, ${a.evalue.toExponential(1)})`).join(", ")}</span>
+          ? <span>{value.map(a => `${a.label}${aliasStatsSuffix(a)}`).join(", ")}</span>
           : <span>-</span>
       ),
       disableSortBy: true,
