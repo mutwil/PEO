@@ -10,11 +10,16 @@ export default async function handler(
     case "GET":
       try {
         const { searchTerm, pageIndex, pageSize } = req.query
-        const escSearchTerm = searchTerm.replace(/[\/._-]/ig, "\\$&")
+        /*
+          No regex escaping here: the search below is a $gte/$lt range query,
+          not a regex. Escaping inserted literal backslashes into the term, so
+          any identifier containing "." "_" "-" or "/" — which is most gene IDs
+          — was searched for in a form that cannot match what is stored.
+        */
         const parsedPageIndex = pageIndex ? parseInt(pageIndex) : 0
         const parsedPageSize = pageSize ? parseInt(pageSize) : process.env.pageSize
 
-        const results = await getGenesSearchPage(escSearchTerm, parsedPageIndex, parsedPageSize)
+        const results = await getGenesSearchPage(searchTerm, parsedPageIndex, parsedPageSize)
         res.status(200).json(results)
       } catch (error) {
         console.log(error)

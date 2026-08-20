@@ -23,6 +23,26 @@ const prefixFilter = (field: string, term: string) => ({
   [field]: { $gte: term, $lt: term + "￿" },
 })
 
+/*
+  The same prefix range, but for a field inside an ARRAY (alias[]), where it
+  must be wrapped in $elemMatch.
+
+  Without $elemMatch, MongoDB applies each bound independently across the whole
+  array: a document matches if SOME element is >= the lower bound and SOME
+  element is < the upper bound — not necessarily the same element. So a Medicago
+  gene whose aliases are ["AES58637", "KEH39708"] matched a search for
+  "BRADI_41430s00200", because "AES…" sorts below the upper bound and "KEH…"
+  above the lower one, even though neither remotely starts with "BRADI".
+
+  Measured on the live database, that prefix returned 2,517 documents of which
+  6 were real — 99.8% false positives. $elemMatch forces both bounds onto a
+  single element, and still uses the alias_label_ci index (IXSCAN, 6 keys
+  examined), so it is also faster.
+*/
+const arrayPrefixFilter = (arrayField: string, subField: string, term: string) => ({
+  [arrayField]: { $elemMatch: { [subField]: { $gte: term, $lt: term + "￿" } } },
+})
+
 interface GenesPageInputArgs {
   taxid: number
   pageIndex: number
@@ -264,7 +284,10 @@ export const getGenesSearchPage = async (
 ) => {
   connectMongo()
   const searchFilter = {
-    $or: [prefixFilter("label", searchTerm), prefixFilter("alias.label", searchTerm)],
+    $or: [
+      prefixFilter("label", searchTerm),
+      arrayPrefixFilter("alias", "label", searchTerm),
+    ],
   }
   const genes = await Gene.aggregate()
     .match(searchFilter)
@@ -322,7 +345,7 @@ export const getGeneLabelsSearchPage = async (
       .collation(CASE_INSENSITIVE_COLLATION)
       .skip(skip)
       .limit(pageSize),
-    Gene.find(prefixFilter("alias.label", searchTerm), "label alias")
+    Gene.find(arrayPrefixFilter("alias", "label", searchTerm), "label alias")
       .collation(CASE_INSENSITIVE_COLLATION)
       .skip(skip)
       .limit(pageSize),
