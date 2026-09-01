@@ -7,7 +7,7 @@ import GeneAnnotation from "../models/geneAnnotation"
 
 /* Collation used for all case-insensitive prefix searches below —
    must match the collation the label_ci / alias_label_ci indexes were built with */
-const CASE_INSENSITIVE_COLLATION = { locale: "en", strength: 2 }
+export const CASE_INSENSITIVE_COLLATION = { locale: "en", strength: 2 }
 
 /*
   Build a MongoDB range filter for a case-insensitive PREFIX match on `field`,
@@ -244,7 +244,21 @@ export const getOneGene = async (
   label: string,
 ) => {
   connectMongo()
+    /*
+      Collation is required here, not optional. Without it the planner cannot
+      use label_ci / alias_label_ci (both carry an en/strength-2 collation), so
+      it falls back to IXSCAN {spe_id:1,label:1} with an unbounded label range
+      and post-filters. Measured on the live slow-query log: 58,605 slow queries
+      took that plan, examining 2,317,203,014 documents to return 128,191 --
+      18,076 documents read per document returned, worst case a COLLSCAN of all
+      6,335,869 genes taking 217 seconds to return one. Every miss pays that cost
+      once per candidate in geneLabelCandidates(), up to seven times per lookup.
+      Safe to add: the uploader uppercases every label (zero genes contain a
+      lowercase character) and no species has two labels differing only by case,
+      so strength-2 cannot merge two distinct genes.
+    */
   const query = (l: string) => Gene.findOne({"spe_id": species_id, "$or": [{"label": l}, {"alias.label": l}]})
+    .collation(CASE_INSENSITIVE_COLLATION)
     .populate("gene_annotations")
     .populate({
       path: "neighbors.gene",
@@ -376,10 +390,12 @@ export const getManyGenes = async (
         null for those hits, so the caller silently rendered no MAPMAN
         annotations for them rather than the ones that do exist.
       */
+      /* collation: see the note in getOneGene -- same index, same cost */
       const find = (l: string) => Gene.findOne({
         spe_id: hit.species_id,
         $or: [{ label: l }, { "alias.label": l }],
       })
+        .collation(CASE_INSENSITIVE_COLLATION)
         .populate("gene_annotations")
         .lean()
 

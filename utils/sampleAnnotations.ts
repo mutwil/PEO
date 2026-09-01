@@ -7,7 +7,7 @@ import Species from "../models/species"
 import Gene from "../models/gene"
 import SampleAnnotation from "../models/sampleAnnotation"
 import connectMongo from "../utils/connectMongo"
-import { geneLabelCandidates } from "./genes"
+import { geneLabelCandidates, CASE_INSENSITIVE_COLLATION } from "./genes"
 import { getStdDev, getWhiskers } from "./stats"
 
 import * as poNameMap from '/public/data/po_name_map.json' assert {type: 'json'}
@@ -31,10 +31,15 @@ export const getSampleAnnotations = async (
     "Cannot read properties of null (reading '_id')", 500-ing the entire gene
     page for every alias-identified hit.
   */
+  /*
+    Collation matches getOneGene's -- without it this runs the same unbounded
+    IXSCAN {spe_id:1,label:1} scan, and it runs once per candidate for every
+    gene page load.
+  */
   const findGene = (l: string) => Gene.findOne(
     { "spe_id": species._id, "$or": [{ "label": l }, { "alias.label": l }] },
     "_id"
-  )
+  ).collation(CASE_INSENSITIVE_COLLATION)
   // Same candidate list getOneGene uses (raw, uppercased, suffix-stripped), so
   // the expression graph resolves for exactly the identifiers the gene page
   // itself accepts — otherwise the page renders but its graph silently empties.
